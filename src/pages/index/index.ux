@@ -1,0 +1,67 @@
+<import name="input-method" src="../../components/InputMethod/InputMethod.ux"></import>
+<template>
+  <div class="page" style="flex-direction: column;">
+    <text class="text" @click="changeState">
+      {{textOutput}}_
+    </text>
+    <input-method
+      hide="{{hide}}"
+      vibratemode="{{vibratemode}}"
+      @visibility-change="onVisibilityChange"
+      @key-down="onKeyDown"
+      @enter="onEnter"
+      @delete="onDelete"
+      @complete="onComplete"
+    ></input-method>
+  </div>
+</template>
+
+<script>
+import { assemble } from 'es-hangul';
+export default {
+  data: {
+    textValue: "",        // 출력 텍스트
+    hide: false,          // 숨김상태: true, false
+    vibratemode: "short", // 햅틱진동: "short", "long", ""
+  },
+  computed: {
+    // 출력 텍스트를 완성된 문자열로 변환하여 반환
+    textOutput() {
+      return this.textValue.length ? assemble([this.textValue]) : ""
+    }
+  },
+  onVisibilityChange(evt) {
+    console.log("키보드숨김상태 변경: " + JSON.stringify(evt));
+  },
+  onKeyDown(evt) {
+    console.log("키입력 이벤트: " + JSON.stringify(evt));
+  },
+  onEnter() {
+    this.textValue += "\n";
+    console.log("엔터 입력됨");
+  },
+  onDelete() {
+    this.textValue = this.textValue.slice(0, -1);
+    console.log("문자 삭제됨");
+  },
+  changeState() {
+    this.hide = !this.hide;
+  },
+  onComplete(evt) {
+    this.textValue += evt.detail.content;
+    console.log("문자 반환됨: " + JSON.stringify(evt));
+  },
+};
+</script>
+
+<style>
+/* 빌드시 @font-face 주석처리 */
+@font-face { font-family: 'MiSans-Medium'; src: url('../../components/InputMethod/assets/NanumGothicLight.otf');}
+text { font-family: "MiSans-Medium" }
+
+.text {
+  font-size: 25px;
+  text-align: center;
+  color: white;
+}
+</style>
