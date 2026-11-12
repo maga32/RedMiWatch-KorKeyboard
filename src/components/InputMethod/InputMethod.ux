@@ -6,7 +6,20 @@
         <div style="position:absolute;top:-11px;width:100%;height:276px;justify-content: center">
           <progress percent="{{percent67}}" style="position:absolute;bottom: 12px;width:80px;color:#ffffff;stroke-width:6px;layer-color:#262626;"></progress>
           <scroll id="keyboard67" scroll-x="{{true}}" onscroll="handelScroll">
-            <div if="{{numFlag}}" style="left: 6px; flex-direction: column;">
+            <div if="{{myFlag}}" style="left: 6px; flex-direction: column;">
+              <div static style="margin-left: 0px;margin-top: 0px;height: 60px;">
+                <text class="calbtn67 mybtn" for="{{item in keys['my'][0]}}" @click="onMySelect(item)">{{item}}</text>
+                <text class="calbtn67 mybtn" @click="onBtnClick('addMy')">[+Add]</text>
+                <text class="calbtn67 mybtn {{delMyFlag ? 'delOn' : ''}}" @click="onBtnClick('delMy')">[-Del]</text>
+              </div>
+              <div static style="margin-left: 32px;margin-top: -5px;height: 60px;">
+                <text class="calbtn67 mybtn" for="{{item in keys['my'][1]}}" @click="onMySelect(item)">{{item}}</text>
+              </div>
+              <div static style="margin-left: 64px;margin-top: -5px;height: 60px;">
+                <text class="calbtn67 mybtn" for="{{item in keys['my'][2]}}" @click="onMySelect(item)">{{item}}</text>
+              </div>
+            </div>
+            <div elif="{{numFlag}}" style="left: 6px; flex-direction: column;">
               <div static style="margin-left: 0px;margin-top: 0px;height: 60px;">
                 <text class="calbtn67" for="{{item in keys['sign'][0]}}" @click="onSelect(item)">{{item}}</text>
               </div>
@@ -17,7 +30,7 @@
                 <text class="calbtn67" for="{{item in keys['sign'][2]}}" @click="onSelect(item)">{{item}}</text>
               </div>
             </div>
-            <div if="{{!numFlag && lang==='en'}}" style="left: 6px; flex-direction: column;">
+            <div if="{{!myFlag && !numFlag && lang==='en'}}" style="left: 6px; flex-direction: column;">
               <div static style="margin-left: 0px;margin-top: 0px;height: 60px;">
                 <text class="calbtn67" for="{{item in keys['full'][0]}}" @click="onSelect(item)">{{item}}</text>
               </div>
@@ -29,7 +42,7 @@
                 <img static src="./assets/space.png" style="width: 60px;height: 60px;" @click="onBtnClick('space')" />
               </div>
             </div>
-            <div if="{{!numFlag && lang==='ko'}}" style="left: 6px; flex-direction: column;">
+            <div if="{{!myFlag && !numFlag && lang==='ko'}}" style="left: 6px; flex-direction: column;">
               <div static style="margin-left: 0px;margin-top: 0px;height: 60px;">
                 <text class="calbtn67" for="{{item in keys['ko'][upperFlag ? 3 : 0]}}" @click="onSelect(item)">{{item}}</text>
               </div>
@@ -44,14 +57,29 @@
           </scroll>
         </div>
         <!-- 상단 설정부 -->
-        <div if="{{numFlag}}" style="width: 100%; flex-direction: row; justify-content: center; top:6px; padding:0 6px;">
+        <!-- 내설정 -->
+        <div if="{{myFlag}}" style="width: 100%; flex-direction: row; justify-content: center; top:6px; padding:0 6px;">
           <!-- Back to Keys -->
-          <img src="./assets/back2.png" style="margin-left: 6px;padding: 6px;width: 159px;height: 60px;" @click="onBtnClick('switchLang')" if="{{numFlag}}" />
+          <img src="./assets/back2.png" style="margin-left: 6px;padding: 6px;width: 159px;height: 60px;" @click="onBtnClick('switchLang')" />
           <!-- Enter -->
           <img src="./assets/enter.png" style="margin-left: 6px;padding: 6px;width: 94px;height: 60px;" @click="onBtnClick('E')" />
+          <!-- My -->
+          <img src="./assets/123.png" style="margin-left: 6px;padding: 6px;width: 94px;height: 60px;" @click="onBtnClick('switchNum')" />
           <!-- Del -->
-          <img src="./assets/del2.png" style="margin-left: 6px;padding: 6px;" @click="onBtnClick('D')" />
+          <img src="./assets/del.png" style="margin-left: 6px;padding: 6px;width: 60px;height: 60px;" @click="onBtnClick('D')" />
         </div>
+        <!-- 숫자 -->
+        <div elif="{{numFlag}}" style="width: 100%; flex-direction: row; justify-content: center; top:6px; padding:0 6px;">
+          <!-- Back to Keys -->
+          <img src="./assets/back2.png" style="margin-left: 6px;padding: 6px;width: 159px;height: 60px;" @click="onBtnClick('switchLang')" />
+          <!-- Enter -->
+          <img src="./assets/enter.png" style="margin-left: 6px;padding: 6px;width: 94px;height: 60px;" @click="onBtnClick('E')" />
+          <!-- My -->
+          <img src="./assets/my.png" style="margin-left: 6px;padding: 6px;width: 94px;height: 60px;" @click="onBtnClick('switchMy')" />
+          <!-- Del -->
+          <img src="./assets/del.png" style="margin-left: 6px;padding: 6px;width: 60px;height: 60px;" @click="onBtnClick('D')" />
+        </div>
+        <!-- 한영 -->
         <div else style="width: 100%; flex-direction: row; justify-content: center; top:6px; padding:0 6px;">
           <!-- Lang -->
           <img src="./assets/ko.png" style="padding: 6px;width: 60px;height: 60px;" @click="onBtnClick('lang')" if="{{lang==='ko'}}" />
@@ -73,7 +101,8 @@
 
 <script>
 import vibrator from "@system.vibrator";
-import device from '@system.device'
+import device from '@system.device';
+import storage from '@system.storage';
 
 export default {
   props: {
@@ -83,11 +112,16 @@ export default {
     vibratemode: {
       default: "",
     },
+    currenttext: {
+      default: "",
+    },
   },
   data: {
     lang: "ko",
     numFlag: false,
     upperFlag: false,
+    myFlag: false,
+    delMyFlag: false,
     percent67: 52,
     // screenShape가 rect인 기기는 screenWidth를 자동으로 가져와 루트 div에 바인딩
     // 이렇게 하면 n67, o65 및 후속 기기까지 동시에 지원 가능하나 실제 효과는 designWidth의 영향을 받을 수 있음
@@ -109,11 +143,29 @@ export default {
         ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "[", "]"],
         ["~", ";", ":", "-", "_", "=", "+", "<", ">", "\\", "|"],
       ],
+      my: [
+        [],
+        [],
+        [],
+      ],
     },
   },
   onInit() {
     this.adjustScreenWidth();
     this.$watch("hide", "watchHidePropsChange");
+    
+    const self = this
+    storage.get({
+      key: 'myKorList',
+      success: function(getData) {
+        if(!getData) getData = '[[],[],[]]'
+        let data = JSON.parse(getData)
+        self.keys.my = data
+      },
+      fail: function(getData, code) {
+        console.log(`getData fail, code = ${code}`)
+      }
+    })
   },
   addAllTxt(txt) {
     // 문자
@@ -125,6 +177,7 @@ export default {
   },
   onBtnClick(sign) {
     this.onVibrate();
+    if (sign !== "delMy") this.delMyFlag = false;
     switch (sign) {
       case "lang":
         if (this.lang === "ko") {
@@ -144,11 +197,14 @@ export default {
       case "space":
         this.addAllTxt(" ");
         break;
+      case "switchMy":
+        this.switchOnly("myFlag");
+        break;
       case "switchNum":
-        this.numFlag = true;
+        this.switchOnly("numFlag");
         break;
       case "switchLang":
-        this.numFlag = false;
+        this.switchOnly("");
         break;
       case "switchUpper":
         this.upperFlag = true;
@@ -156,16 +212,62 @@ export default {
       case "switchLow":
         this.upperFlag = false;
         break;
+      case "delMy":
+        this.delMyFlag = !this.delMyFlag;
+        break;
+      case "addMy":
+        this.saveMy(sign);
+        break;
       default:
         this.addAllTxt(sign);
         break;
     }
   },
+  switchOnly(flag) {
+    this.myFlag = false;
+    this.numFlag = false;
+    if (flag) this[flag] = true;
+  },
+  saveMy(type) {
+    if (type == "addMy") {
+      if (!this.currenttext) return;
+      const minIndex = this.keys.my.reduce((min, row, i) => row.length < this.keys.my[min].length ? i : min, 0);
+      this.keys.my[minIndex].push(this.currenttext);
+    }
+
+    const self = this;
+    storage.set({
+      key: 'myKorList',
+      value: JSON.stringify(self.keys.my),
+      success: function(setData) {
+        console.log('setData success!!! ', setData)
+      },
+      fail: function(setData, code) {
+        console.log('setData fail!!! ', setData)
+      }
+    })
+
+    this.delMyFlag = false;
+
+    this.$emit("keyDown", { content: type });
+    this.onVibrate();
+  },
+  onMySelect(item) {
+    if (!this.delMyFlag) {
+      this.onSelect(item);
+      return;
+    }
+
+    // 삭제플래그 있는경우 삭제
+    const row = this.keys.my.find(row => row.includes(item));
+    if (row) row.splice(row.indexOf(item), 1);
+    this.saveMy("delMy");
+  },
   onSelect(num) {
     // 키입력신호
     this.$emit("keyDown", { content: num });
     this.onVibrate();
-    if (this.lang === "en" && !this.numFlag) {
+    if (this.lang === "en" && !this.numFlag && !this.myFlag) {
       if (this.upperFlag) {
         this.addAllTxt(num.toUpperCase());
       } else {
@@ -209,6 +311,7 @@ text { font-family: "MiSans-Medium" }
 	left:0;
 	bottom:0
 }
+
 .calbtn67 {
 	color:rgb(255,255,255);
 	font-size:32px;
@@ -220,6 +323,19 @@ text { font-family: "MiSans-Medium" }
 	border-radius:30px;
 	text-align:center;
 	border:3px solid rgba(255,255,255,0.06);
+}
+
+.mybtn {
+  width: auto !important;
+  height:50px !important;
+  padding: 0 20px;
+  lines: 1;
+  text-overflow: ellipsis;
+}
+
+.delOn {
+	background-color:rgb(255,255,255) !important;
+	color:rgb(38,38,38) !important;
 }
 
 #keyboard67 {

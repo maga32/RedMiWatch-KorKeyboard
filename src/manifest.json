@@ -10,7 +10,8 @@
   ],
   "features": [
     {"name": "system.vibrator"},
-    {"name": "system.device"}
+    {"name": "system.device"},
+    {"name": "system.storage"}
   ],
   "config": {
     "logLevel": "log",

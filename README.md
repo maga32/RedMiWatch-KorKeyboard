@@ -20,7 +20,8 @@ npm install es-hangul
 ```
 "features": [
     {"name": "system.vibrator"},
-    {"name": "system.device"}
+    {"name": "system.device"},
+    {"name": "system.storage"}
 ],
 ```
 
